@@ -1,13 +1,17 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import axios, { AxiosInstance } from 'axios';
 import { PokeResponse } from './interfaces/poke-response.interface';
-import { PokemonService } from 'src/pokemon/pokemon.service';
+import { Pokemon } from 'src/pokemon/entities/pokemon.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class SeedService {
   private readonly axios: AxiosInstance;
 
-  constructor(private readonly pokemonService: PokemonService) {}
+  constructor(
+    @InjectModel(Pokemon.name) private readonly pokemonModel: Model<Pokemon>,
+  ) {}
 
   async executeSeed() {
     const maxPokemon = 659;
@@ -17,13 +21,15 @@ export class SeedService {
         `https://pokeapi.co/api/v2/pokemon?limit=${maxPokemon}}`,
       );
 
+      await this.pokemonModel.deleteMany({});
+
       const results = data.results.map(async ({ name, url }) => {
         const segments = url.split('/');
         const no = +(url.endsWith('/')
           ? segments[segments.length - 2]
           : segments[segments.length - 1]);
 
-        await this.pokemonService.create({ no, name });
+        await this.pokemonModel.create({ no, name });
       });
 
       const allPromise = Promise.allSettled(results);
