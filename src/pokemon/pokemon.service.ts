@@ -69,7 +69,19 @@ export class PokemonService {
       updatePokemonDto.name = updatePokemonDto.name.toLocaleLowerCase();
     }
 
-    await pokemon.updateOne(updatePokemonDto);
+    try {
+      await pokemon.updateOne(updatePokemonDto);
+    } catch (error) {
+      if (error.code === 11000) {
+        throw new BadRequestException(
+          `Pokemon already exists in db ${JSON.stringify(error.keyValue)}`,
+        );
+      }
+      console.log(error);
+      throw new InternalServerErrorException(
+        `Can't update Pokemon - Check server logs`,
+      );
+    }
 
     return { ...pokemon.toJSON(), ...updatePokemonDto };
   }
