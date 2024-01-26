@@ -18,8 +18,14 @@
    ```
 
 1. Star the database
+
    ```
    docker-compose up -d
+   ```
+
+1. Restore the database by Seed
+   ```
+   localhost:3000/api/v2/seed
    ```
 
 ## Stack
