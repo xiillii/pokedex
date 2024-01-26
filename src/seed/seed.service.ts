@@ -23,24 +23,18 @@ export class SeedService {
 
       await this.pokemonModel.deleteMany({});
 
-      const results = data.results.map(async ({ name, url }) => {
+      const pokemonToInsert: { name: string; no: number }[] = [];
+
+      data.results.map(({ name, url }) => {
         const segments = url.split('/');
         const no = +(url.endsWith('/')
           ? segments[segments.length - 2]
           : segments[segments.length - 1]);
 
-        await this.pokemonModel.create({ no, name });
+        pokemonToInsert.push({ name, no });
       });
 
-      const allPromise = Promise.allSettled(results);
-      const statuses = await allPromise;
-
-      if (statuses.filter((s) => s.status === 'rejected').length > 0) {
-        console.log(statuses);
-        throw new InternalServerErrorException(
-          'Error seeding the database. Watch the server logs',
-        );
-      }
+      await this.pokemonModel.insertMany(pokemonToInsert);
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(
