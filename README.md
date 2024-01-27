@@ -23,6 +23,14 @@
    docker-compose up -d
    ```
 
+1. Rename the file `.env.template` to `.env`
+1. Fill variables in `.env`
+1. Run the application in Dev environment
+
+   ```
+   yarn start:dev
+   ```
+
 1. Restore the database by Seed
    ```
    localhost:3000/api/v2/seed
